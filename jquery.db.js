@@ -55,7 +55,33 @@
       if (Types.isString(this.value)) {
         valueExpr = "'" + valueExpr + "'";
       }
-      return $format("(x['{0}'] {1} {2})", this.key, ComparisonOperations[this.operation], valueExpr);
+      
+      var op = ComparisonOperations[this.operation];
+      if (op == ComparisonOperations.$eq || op == ComparisonOperations.$ne) {
+        // include array and object condition
+        var revOp = (function () {
+          if (op == ComparisonOperations.$eq) return ComparisonOperations.$ne
+          else                                return ComparisonOperations.$eq
+        })();
+        return $format(
+          "(function () { if (x['{key}'] instanceof Array) { return x['{key}'].indexOf({value}) {arrayOp} -1 } else { return x['{key}'] {valueOp} {value} } })()",
+          {
+            key: this.key,
+            value: valueExpr,
+            valueOp: op,
+            arrayOp: revOp
+          }
+        );
+      } else {
+        return $format(
+          "x['{key}'] {op} {value}",
+          {
+            key: this.key,
+            value: valueExpr,
+            op: op
+          }
+        );
+      }
     }
     
     return ComparisonOperator;

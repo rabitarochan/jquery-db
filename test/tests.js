@@ -1,13 +1,12 @@
 var context = {
   setup: function () {
     $.db('test').insert([
-      { name: 'User01', age: 20 },
-      { name: 'User02', age: 12, isChild: true },
-      { name: 'User03', age: 65 },
+      { name: 'User01', age: 20, fruits: ['orange', 'kiwi'] },
+      { name: 'User02', age: 12, isChild: true, fruits: ['kiwi'] },
+      { name: 'User03', age: 65, fruits: 'orange' },
       { name: 'User04', age: 0, isBaby: true },
-      { name: 'User05' }
+      { name: 'User05', fruits: ['apple', 'orange', 'peach'] }
     ]);
-
   },
   teardown: function () {
     $.db('test').drop();
@@ -22,6 +21,15 @@ module('localStorage find', context);
     strictEqual(test.length, 5, 'data count');
     strictEqual(test[0].age, 20, 'get number value');
     strictEqual(test[3].isBaby, true, 'get boolean value');
+  });
+  
+  test('array condition', function () {
+    var orange = $.db('test').find({ fruits: 'orange' });
+    strictEqual(orange.length, 3, '$eq');
+    
+    var notKiwi = $.db('test').find({ fruits: { $ne: 'kiwi' } });
+    console.log(JSON.stringify(notKiwi));
+    strictEqual(notKiwi.length, 3, '$ne');
   });
 
   test('$eq, $ne condition', function () {
@@ -70,12 +78,13 @@ module('localStorage find', context);
   });
 
   test('some condition', function () {
-    var oreqlt = $.db('test').find({ $or: [ { isChild: true }, { age: { $lt: 20 } } ] });
-    strictEqual(oreqlt.length, 2, '$or and $eq and $lt');
+    var res1 = $.db('test').find({ $or: [ { isChild: true }, { age: { $lt: 20 } } ] });
+    strictEqual(res1.length, 2, '$or and $eq and $lt');
+    
+    var res2 = $.db('test').find({ $or: [{ fruits: { $ne: 'orange' } }, { fruits: 'kiwi' }] });
+    strictEqual(res2.length, 3, '$or and $ne(array) and $eq(array)');
   });
 }
-
-
 
 module('remove', context);
 {
