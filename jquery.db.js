@@ -232,7 +232,7 @@
         if (oldValue == null) return 0;
         if (oldValue.length <= 0) return 0;
         
-        if (query == undefined) return oldvalue.length;
+        if (query == undefined) return oldValue.length;
         
         var count = 0;
         var f = OperatorBuilder.createQueryFunction(query);
@@ -254,6 +254,21 @@
           arr.push(value);
         }
         db.set(name, arr);
+      },
+      
+      remove: function(query) {
+        var oldValue = db.get(name);
+        if (query == undefined || JSON.stringify(query) == '{}') {
+          db.set(name, []);
+          return;
+        }
+        
+        var f = OperatorBuilder.createQueryFunction(query);
+        for (var i = oldValue.length - 1; i >= 0; i--) {
+          if (f(oldValue[i])) oldValue.splice(i, 1);
+        }
+        
+        db.set(name, oldValue);
       },
       
       drop: function () {
