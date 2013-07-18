@@ -7,16 +7,16 @@
  */
 (function($){
 
-  // string.format
-  String.prototype.format = function (arg) {
+  // string format like .NET Framework
+  var $format = function (format, arg) {
     var f;
-    if (typeof (arg) == 'object') {
-      f = function (m, k) { return arg[k]; }
+    if (typeof(arg) == 'object') {
+      f = function (match, key) { return arg[key]; }
     } else {
       var args = arguments;
-      f = function (m, k) { return args[parseInt(k)]; }
+      f = function (match, key) { return args[parseInt(key) + 1]; }
     }
-    return this.replace(/\{(\w+)\}/g, f);
+    return format.replace(/\{(\w+)\}/g, f);
   }
 
   var PREFIX = "db.";
@@ -51,11 +51,11 @@
     }
     
     ComparisonOperator.prototype.build = function () {
-      var valueExpr = '{0}'.format(this.value);
+      var valueExpr = $format('{0}', this.value);
       if (Types.isString(this.value)) {
         valueExpr = "'" + valueExpr + "'";
       }
-      return "(x['{0}'] {1} {2})".format(this.key, ComparisonOperations[this.operation], valueExpr);
+      return $format("(x['{0}'] {1} {2})", this.key, ComparisonOperations[this.operation], valueExpr);
     }
     
     return ComparisonOperator;
@@ -83,7 +83,7 @@
       if (exprs.length <= 1) {
         return exprs[0];
       } else {
-        return '({0})'.format(exprs.join(LogicalOperations[this.operation]));
+        return $format('({0})', exprs.join(LogicalOperations[this.operation]));
       }
     }
     
@@ -106,7 +106,8 @@
     }
     
     InOperator.prototype.build = function () {
-      return "(jQuery.inArray(x['{0}'], {1}) {2} -1)".format(
+      return $format(
+        "(jQuery.inArray(x['{0}'], {1}) {2} -1)",
         this.key, JSON.stringify(this.values), InOperations[this.operation]
       );
     }
