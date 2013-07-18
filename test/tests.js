@@ -28,7 +28,6 @@ module('localStorage find', context);
     strictEqual(orange.length, 3, '$eq');
     
     var notKiwi = $.db('test').find({ fruits: { $ne: 'kiwi' } });
-    console.log(JSON.stringify(notKiwi));
     strictEqual(notKiwi.length, 3, '$ne');
   });
 
